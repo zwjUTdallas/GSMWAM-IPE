@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import print_function, division
+from builtins import zip, range
 import numpy
 #numpy.set_printoptions(threshold='nan')
 from os import path

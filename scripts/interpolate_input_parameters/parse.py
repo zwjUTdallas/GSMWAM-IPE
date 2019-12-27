@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import print_function
+from builtins import zip, range
 import xml.etree.ElementTree as ET
 import sys
 from sw_from_f107_kp import *
