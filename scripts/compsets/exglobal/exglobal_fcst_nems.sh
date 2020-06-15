@@ -954,6 +954,20 @@ export PHYVARS="IEMS=$IEMS,ISOL=$ISOL,IAER=$IAER,ICO2=$ICO2,$PHYVARS"
 #
 #     For one member case i.e. control
 #     --------------------------------
+if [[ $WAM_IPE_COUPLING = .true. ]] ; then
+  if [[ $SWIO = .true. ]] ; then
+    envsubst < $PARMDIR/nems.configure.WAM-IPE_io       > $DATA/nems.configure
+  else
+    envsubst < $PARMDIR/nems.configure.WAM-IPE          > $DATA/nems.configure
+  fi
+else # standaloneWAM
+  if [[ $SWIO = .true. ]] ; then
+    envsubst < $PARMDIR/nems.configure.standaloneWAM_io > $DATA/nems.configure
+  else
+    envsubst < $PARMDIR/nems.configure.standaloneWAM    > $DATA/nems.configure
+  fi
+fi
+
 mins=$((DELTIM/60))
 secs=$((DELTIM-(DELTIM/60)*60))
 [[ $mins -lt 10 ]] &&mins=0$mins
@@ -1062,14 +1076,19 @@ if [[ $IPE = .true. ]] ; then
 fi
 if [[ $SWIO = .true. ]] ; then
   for iomodel in $SWIO_MODELS; do
-    eval prefix=\$${iomodel}_PREFIX
+    infile=$(sed -n -e '/^'"$iomodel"'_attributes/,/ConfigFile/ p' nems.configure | tail -n 1 | sed 's/^[ \t]*//' | cut -d' ' -f3)
+    prefix=$(grep output_file_prefix: $PARMDIR/$infile | cut -d' ' -f 2)
+    type=$(grep output_format: $PARMDIR/$infile | cut -d' ' -f 2)
+    suffix=".nc"
+    [[ $type = "hdf5" ]] && suffix=".hd5"
+    envsubst < $PARMDIR/$infile > $infile
     eval cadence=\$${iomodel}_CADENCE
     if [[ -n "$cadence" ]] ; then
       STEPS=$(((10#$FHMAX-10#$FHINI)*60*60/cadence))
       STEP=1
       while [ $STEP -le $STEPS ] ; do
         TIMESTAMP=`$MDATE $((STEP*cadence/60)) ${FDATE}00`
-        $NLN ${COMOUT}/${prefix}.${TIMESTAMP:0:8}_${TIMESTAMP:8}00.nc ${DATA}/.
+        $NLN ${COMOUT}/${prefix}.${TIMESTAMP:0:8}_${TIMESTAMP:8}00${suffix} ${DATA}/.
         STEP=$((STEP+1))
       done
     fi
@@ -1233,20 +1252,6 @@ if [ $IDEA = .true. ]; then
 
 fi # IDEA
 
-if [[ $WAM_IPE_COUPLING = .true. ]] ; then
-  if [[ $SWIO = .true. ]] ; then
-    envsubst < $PARMDIR/nems.configure.WAM-IPE_io       > $DATA/nems.configure
-  else
-    envsubst < $PARMDIR/nems.configure.WAM-IPE          > $DATA/nems.configure
-  fi
-else # standaloneWAM
-  if [[ $SWIO = .true. ]] ; then
-    envsubst < $PARMDIR/nems.configure.standaloneWAM_io > $DATA/nems.configure
-  else
-    envsubst < $PARMDIR/nems.configure.standaloneWAM    > $DATA/nems.configure
-  fi
-fi
-
 if [[ $NEMS = .true. ]] ; then
   export dyncore=${dyncore:-gfs}
   export atm_model=${atm_model:-gsm}
@@ -1315,13 +1320,6 @@ if [[ $NEMS = .true. ]] ; then
     export CDATE_SFC=${CDATE_SFC:-$(echo idate|$SFCHDR ${SFCI}$FM)}
     export FHINI_SFC=${FHINI_SFC:-$(echo fhour|$SFCHDR ${SFCI}$FM)}
     eval $CHGSFCFHREXEC $SFCI $CDATE_SIG $FHINI
-  fi
-  # envsubst in the appropriate SWIO rc files
-  if [[ $SWIO = .true. ]] ; then
-    for iomodel in $SWIO_MODELS; do
-      infile=`sed -n -e '/^'"$iomodel"'_attributes/,/ConfigFile/ p' nems.configure | tail -n 1 | sed 's/^[ \t]*//' | cut -d' ' -f3`
-      envsubst < $PARMDIR/$infile > $infile
-    done
   fi
 fi # NEMS
 
