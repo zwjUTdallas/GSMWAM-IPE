@@ -1060,21 +1060,6 @@ if [[ $IPE = .true. ]] ; then
     STEP=$((STEP+1))
   done
 fi
-if [[ $SWIO = .true. ]] ; then
-  for iomodel in $SWIO_MODELS; do
-    eval prefix=\$${iomodel}_PREFIX
-    eval cadence=\$${iomodel}_CADENCE
-    if [[ -n "$cadence" ]] ; then
-      STEPS=$(((10#$FHMAX-10#$FHINI)*60*60/cadence))
-      STEP=1
-      while [ $STEP -le $STEPS ] ; do
-        TIMESTAMP=`$MDATE $((STEP*cadence/60)) ${FDATE}00`
-        $NLN ${COMOUT}/${prefix}.${TIMESTAMP:0:8}_${TIMESTAMP:8}00.nc ${DATA}/.
-        STEP=$((STEP+1))
-      done
-    fi
-  done
-fi
 eval ln -fs $FORT1051 fort.1051
 eval ln -fs $GRDR1 GRDR1
 eval ln -fs $GRDR2 GRDR2
@@ -1232,6 +1217,10 @@ if [ $IDEA = .true. ]; then
   fi # IPE
 
 fi # IDEA
+
+if [[ $SWIO = .true. ]] ; then
+  $NLN $COMOUT SWIO
+fi
 
 if [[ $WAM_IPE_COUPLING = .true. ]] ; then
   if [[ $SWIO = .true. ]] ; then

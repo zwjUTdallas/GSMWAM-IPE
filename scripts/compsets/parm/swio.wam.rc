@@ -24,7 +24,7 @@ import_fields::
 #
 #  <import_field_name>    [<output_variable_name>]
 output_fields::
-    height                              wam_height_levels
+    height
     temp_neutral
     eastward_wind_neutral
     northward_wind_neutral
@@ -66,7 +66,7 @@ output_datatype: float
 #   <suffix>   : determined from output format:
 #                'hd5' for hdf5, 'nc' for pnetcdf
 #
-output_file_prefix: gsm
+output_file_prefix: SWIO/gsm
 #
 # Output metadata.
 #
