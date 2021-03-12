@@ -620,16 +620,6 @@ export SIGS2=${SIGS2:-${COMENS}/sigs2}
 export SFCS=${SFCS:-${COMENS}/sfcs}
 export NSTS=${NSTS:-${COMENS}/nsts}
 
-## History Files
-export SIGO=${SIGO:-${COMENS}/${SIGOSUF}f'${FHIAU}''${MN}'$SUFOUT}
-export SFCO=${SFCO:-${COMENS}/${SFCOSUF}f'${FHIAU}''${MN}'$SUFOUT}
-export FLXO=${FLXO:-${COMENS}/${FLXOSUF}f'${FHIAU}''${MN}'$SUFOUT}
-export LOGO=${LOGO:-${COMENS}/logf'${FHIAU}''${MN}'$SUFOUT}
-export D3DO=${D3DO:-${COMENS}/d3df'${FHIAU}''${MN}'$SUFOUT}
-export NSTO=${NSTO:-${COMENS}/${NSTOSUF}f'${FHIAU}''${MN}'$SUFOUT}
-export AERO=${AERO:-${COMOUT}/aerf'${FH}''${MN}'$SUFOUT}
-export PLASO=${PLASO:-'IPE_State.apex.${TIMESTAMP}.h5'}
-
 export INISCRIPT=${INISCRIPT}
 export ERRSCRIPT=${ERRSCRIPT:-'eval [[ $err = 0 ]]'}
 export LOGSCRIPT=${LOGSCRIPT}
@@ -804,9 +794,31 @@ export REDERR=${REDERR:-'2>'}
 export print_esmf=${print_esmf:-.false.}
 
 ################################################################################
-#  Preprocessing
+#  ensemble setup
 $INISCRIPT
 pwd=$(pwd)
+mem_min=$(($njob*$mem_per_job))
+mem_max=$(((1+$njob)*$mem_per_job-1))
+
+for member in `seq $mem_min $mem_max` ; do
+
+### INPUT
+COUNT=1
+MAXCOUNT=$member
+while IFS=, read FIX_KP FIX_F107; do
+  (( COUNT++ ))
+  if (( COUNT - 1 > MAXCOUNT )); then
+    break
+  fi
+done < ${driver_input}
+
+if (( COUNT-1 <= MAXCOUNT )); then
+  # Warn if we ran out of parameter combinations in the file
+  echo "Reached end of ${driver_input}. Exiting."
+  exit
+fi
+
+DATA=$RUNDIR/mem$(printf %03d $member)
 if [[ -d $DATA ]] ; then
    mkdata=NO
 else
@@ -814,6 +826,21 @@ else
    mkdata=YES
 fi
 cd $DATA||exit 99
+
+### OUTPUT
+COMOUT=$ROTDIR/mem$(printf %03d $member)
+COMENS=$COMOUT
+## History Files
+export SIGO=${COMENS}/${SIGOSUF}f'${FHIAU}''${MN}'$SUFOUT
+export SFCO=${COMENS}/${SFCOSUF}f'${FHIAU}''${MN}'$SUFOUT
+export FLXO=${COMENS}/${FLXOSUF}f'${FHIAU}''${MN}'$SUFOUT
+export LOGO=${COMENS}/logf'${FHIAU}''${MN}'$SUFOUT
+export D3DO=${COMENS}/d3df'${FHIAU}''${MN}'$SUFOUT
+export NSTO=${COMENS}/${NSTOSUF}f'${FHIAU}''${MN}'$SUFOUT
+export AERO=${COMOUT}/aerf'${FH}''${MN}'$SUFOUT
+export PLASO=${PLASO:-'IPE_State.apex.${TIMESTAMP}.h5'}
+
+
 [[ -d $COMOUT ]]||mkdir -p $COMOUT
 ################################################################################
 #  Make forecast
@@ -1340,8 +1367,11 @@ $ERRSCRIPT||exit 2
 ################################################################################
 #  Postprocessing
 cd $pwd
+
 [[ $mkdata = YES ]]&&rmdir $DATA
 $ENDSCRIPT
+
+done # mem loop
 
 if [[ "$VERBOSE" = "YES" ]] ; then
    echo $(date) EXITING $0 with return code $err >&2

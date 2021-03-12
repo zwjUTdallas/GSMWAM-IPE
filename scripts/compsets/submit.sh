@@ -122,4 +122,4 @@ exit $status
 EOF
 
 $SCHEDULER_SUB < $tmp
-mv $tmp $ROTDIR/jobcard_$cycle
+mv $tmp $ROTDIR/jobcard_$(printf %02d $njob)_${cycle}
