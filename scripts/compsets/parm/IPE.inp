@@ -15,7 +15,8 @@
  F107_KP_SKIP_SIZE       = ${F107_KP_SKIP_SIZE},
  F107_KP_DATA_SIZE       = ${F107_KP_DATA_SIZE},
  F107_KP_READ_IN_START   = ${F107_KP_READ_IN_START},
- F107_KP_FILE            = './wam_input_f107_kp.txt'
+ F107_KP_FILE            = './wam_input_f107_kp.txt',
+ F107_KP_REALTIME_INTERVAL = $f107_kp_realtime_interval
 /
 &FILEIO
  READ_APEX_NEUTRALS        = ${READ_APEX_NEUTRALS},
@@ -32,4 +33,14 @@
 /
 &ELDYN
   DYNAMO_EFIELD          = ${DYNAMO_EFIELD}
+/
+&OPERATIONAL
+  COLFAC                 = ${COLFAC}
+  OFFSET1_DEG            = ${OFFSET1_DEG}
+  OFFSET2_DEG            = ${OFFSET2_DEG}
+  POTENTIAL_MODEL        = ${POTENTIAL_MODEL}
+  HPEQ                   = ${HPEQ}
+  TRANSPORT_HIGHLAT_LP   = ${TRANSPORT_HIGHLAT_LP}
+  PERP_TRANSPORT_MAX_LP  = ${PERP_TRANSPORT_MAX_LP}
+  VERTICAL_WIND_LIMIT    = ${VERTICAL_WIND_LIMIT}
 /
