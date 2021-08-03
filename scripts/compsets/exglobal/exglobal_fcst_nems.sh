@@ -1171,6 +1171,10 @@ if [ $IDEA = .true. ]; then
     $BASE_NEMS/../scripts/interpolate_input_parameters/parse_realtime.py -s $start -d $duration -p $DCOM
     $BASE_NEMS/../scripts/interpolate_input_parameters/realtime_wrapper.py -e ${SWIO_EDATE:0:8}${SWIO_EDATE:9:4} -p $DCOM -d 15 &
 
+  elif [ $INPUT_PARAMETERS = indir ] ; then
+    cp $COMOUT/wam_input_f107_kp.txt $DATA/.
+    #F107_KP_SKIP_SIZE=$((($FHINI+24)*60))
+
   else
     # work from the database
     echo "$FIX_F107"   >> temp_fix
@@ -1190,8 +1194,8 @@ if [ $IDEA = .true. ]; then
   LEN_F107=`wc -l wam_input_f107_kp.txt | cut -d' ' -f 1`
   F107_KP_SIZE=$((LEN_F107-5))
   F107_KP_DATA_SIZE=$F107_KP_SIZE
-  F107_KP_INTERVAL=60
-  F107_KP_SKIP_SIZE=$((36*60*60/$F107_KP_INTERVAL))
+  F107_KP_INTERVAL=${F107_KP_INTERVAL:-60}
+  F107_KP_SKIP_SIZE=${F107_KP_SKIP_SIZE:-$((36*60*60/$F107_KP_INTERVAL))}
   [[ $NEMS = .true. ]] && F107_KP_READ_IN_START=$((FHINI*60*60/$F107_KP_INTERVAL))
   export F107_KP_READ_IN_START=${F107_KP_READ_IN_START:-0}
   export f107_kp_size=$((F107_KP_SIZE+$FHINI*60*60/$F107_KP_INTERVAL))
