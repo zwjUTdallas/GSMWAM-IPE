@@ -466,7 +466,6 @@ export PARM_NGAC=${PARM_NGAC:-$NWPROD/parm/parm_ngac}
 export EXECGLOBAL=${EXECGLOBAL:-$NWPROD/exec}
 export DATA=${DATA:-$(pwd)}
 export COMOUT=${COMOUT:-$(pwd)}
-export DIRNC=${DIRNC:-$(pwd)}
 
 #  Filenames.
 MN=${MN:-""}
@@ -818,7 +817,6 @@ else
 fi
 cd $DATA||exit 99
 [[ -d $COMOUT ]]||mkdir -p $COMOUT
-[[ -d $DIRNC ]]||mkdir -p $DIRNC
 ################################################################################
 #  Make forecast
 export PGM='$FCST_LAUNCHER $DATA/$(basename $FCSTEXEC)'
@@ -1331,7 +1329,6 @@ if [[ $NEMS = .true. ]] ; then
   $NLN $PARMDIR/gwp_in .
   $NLN $PARMDIR/ion_in .
   $NLN $PARMDIR/solar_in .
-  $NLN $PARMDIR/gdasnc_in .
   envsubst < $PARMDIR/wam_control_in > wam_control_in
 
   $NLN atm_namelist.rc ./model_configure
