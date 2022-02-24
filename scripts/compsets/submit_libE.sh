@@ -13,7 +13,7 @@ n_workers=2
 # Number of ensemble members/simulations (typically a multple of workers)
 n_sim=4
 
-export JOBNAME=libE_test11
+export JOBNAME=libE_test_weijia
 
 ## Check WAM configuration
 pwd=$(pwd)
@@ -110,8 +110,8 @@ mkdir -p $ROTDIR
 cat >> $tmp << 'EOF'
 
 # conda environment with python 3.6.12 and libEnsemble
-export PATH="/glade/work/felixn/anaconda3/bin:$PATH"
-source activate myenv
+export PATH="/glade/work/weijiaz/anaconda3/bin:$PATH"
+source activate libenv
 
 ## remove repeated nodes from node_list
 cat $PBS_NODEFILE | uniq > node_list
